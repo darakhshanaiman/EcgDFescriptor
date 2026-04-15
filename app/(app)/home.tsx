@@ -1,6 +1,6 @@
 import { View, Text, Button, StyleSheet } from "react-native";
 import { signOut } from "firebase/auth";
-import { auth } from "../lib/firebase";
+import { auth } from "../../lib/firebase";
 import { router } from "expo-router";
 
 export default function HomeScreen() {
