@@ -62,7 +62,7 @@ function DesktopLanding() {
     <View style={styles.webPage}>
       <View style={styles.webLeft}>
         <ImageBackground
-          source={require("../assets/images/home-web-bg.png")}
+          source={require("../assets/images/welcom.png")}
           style={styles.webBg}
           resizeMode="cover"
         >

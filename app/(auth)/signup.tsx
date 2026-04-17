@@ -11,8 +11,7 @@ import {
   Image,
 } from "react-native";
 import { Ionicons, AntDesign, FontAwesome } from "@expo/vector-icons";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../lib/firebase";
+import { useAuth } from "../../lib/contexts/AuthContext";
 import { router } from "expo-router";
 
 export default function SignupScreen() {
@@ -20,6 +19,7 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { width, height } = useWindowDimensions();
+  const { signUp, signInWithGoogle } = useAuth();
 
   const isSmallScreen = width < 480;
 
@@ -35,10 +35,19 @@ export default function SignupScreen() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email.trim(), password);
+      await signUp(email.trim(), password);
       router.replace("/home");
     } catch (error: any) {
       Alert.alert("Signup failed", error.message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+      router.replace("/home");
+    } catch (error: any) {
+      Alert.alert("Google sign-in failed", error.message);
     }
   };
 
@@ -119,14 +128,9 @@ export default function SignupScreen() {
             <View style={styles.line} />
           </View>
 
-          <Pressable style={styles.socialButton}>
+          <Pressable style={styles.socialButton} onPress={handleGoogleLogin}>
             <AntDesign name="google" size={18} color="#fff" />
             <Text style={styles.socialButtonText}>Login with Google</Text>
-          </Pressable>
-
-          <Pressable style={styles.socialButton}>
-            <FontAwesome name="facebook" size={18} color="#1DA1F2" />
-            <Text style={styles.socialButtonText}>Login with Facebook</Text>
           </Pressable>
         </View>
       </ScrollView>

@@ -1,16 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAKV4sNIEj0iGCyzafMO604TKtjDXwjKBg",
-  authDomain: "ecgdescriptor2.firebaseapp.com",
-  projectId: "ecgdescriptor2",
-  storageBucket: "ecgdescriptor2.firebasestorage.app",
-  messagingSenderId: "444084290777",
-  appId: "1:444084290777:web:d48ccf3e7dbfa2e66aeac8",
-  measurementId: "G-E5J6C269WM"
+  apiKey: "AIzaSyCb6IynXaWiOZ8GCkavieGGDPrA0aZMEMM",
+  authDomain: "lifeline-2e96d.firebaseapp.com",
+  projectId: "lifeline-2e96d",
+  storageBucket: "lifeline-2e96d.firebasestorage.app",
+  messagingSenderId: "396635906800",
+  appId: "1:396635906800:web:b14ca1e1f6f975856c1835",
+  measurementId: "G-YVPLL9DY4K"
 };
 
 const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
