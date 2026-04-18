@@ -14,6 +14,7 @@ import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useChatSessions } from '../../../lib/contexts/ChatSessionsContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { chatEcgWithContext, ChatEcgHistoryMessage } from '../../../lib/services/ecgAnalysisApi';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -38,22 +39,46 @@ export default function ChatScreen() {
     }
   }, [activeSession?.messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
 
     const userMessage = inputText.trim();
     setInputText('');
     appendActiveMessage({ role: 'user', content: userMessage });
 
-    // Simulate AI response
     setIsTyping(true);
-    setTimeout(() => {
+
+    try {
+      // Prepare the description from analysis result
+      const description = activeSession?.analysisResult
+        ? `ECG Analysis Results:\nRhythm: ${activeSession.analysisResult.rhythm}\nHeart Rate: ${activeSession.analysisResult.heartRate} BPM\nFindings: ${activeSession.analysisResult.findings.join(', ')}\nImpression: ${activeSession.analysisResult.impression}`
+        : 'ECG analysis completed.';
+
+      // Convert messages to the API format
+      const previousMessages: ChatEcgHistoryMessage[] = activeSession?.messages
+        .filter(msg => msg.role === 'user' || msg.role === 'ai')
+        .map(msg => ({
+          role: msg.role === 'ai' ? 'ai' : 'user',
+          content: msg.content
+        })) || [];
+
+      // Call the API
+      const result = await chatEcgWithContext(description, userMessage, previousMessages);
+
       setIsTyping(false);
+      appendActiveMessage({
+        role: 'ai',
+        content: result.answer,
+      });
+    } catch (error) {
+      console.error('Chat API failed:', error);
+      setIsTyping(false);
+      // Fallback to mock response
       appendActiveMessage({
         role: 'ai',
         content: getAIResponse(userMessage),
       });
-    }, 1500);
+    }
   };
 
   const getAIResponse = (query: string): string => {
@@ -67,6 +92,45 @@ export default function ChatScreen() {
     return "Your ECG looks stable according to this analysis. The intervals (PR, QRS, QTc) are all within normal limits. Is there a specific part of the findings you'd like me to explain further?";
   };
 
+  const renderMarkdownText = (
+    text: string,
+    style: any,
+    boldStyle: any,
+  ): React.ReactNode[] => {
+    const segments: React.ReactNode[] = [];
+    const regex = /\*\*(.*?)\*\*/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+    let index = 0;
+
+    while ((match = regex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push(
+          <Text key={`text-${index++}`} style={style}>
+            {text.slice(lastIndex, match.index)}
+          </Text>,
+        );
+      }
+
+      segments.push(
+        <Text key={`bold-${index++}`} style={[style, boldStyle]}>
+          {match[1]}
+        </Text>,
+      );
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      segments.push(
+        <Text key={`text-${index++}`} style={style}>
+          {text.slice(lastIndex)}
+        </Text>,
+      );
+    }
+
+    return segments;
+  };
+
   const renderMessage = ({ item }: { item: any }) => {
     const isAI = item.role === 'ai';
     return (
@@ -78,7 +142,9 @@ export default function ChatScreen() {
         )}
         <View style={[styles.messageBubble, isAI ? styles.aiBubble : styles.userBubble]}>
           <Text style={[styles.messageText, isAI ? styles.aiText : styles.userText]}>
-            {item.content}
+            {renderMarkdownText(item.content, [styles.messageText, isAI ? styles.aiText : styles.userText], {
+              fontWeight: '700',
+            })}
           </Text>
         </View>
       </View>

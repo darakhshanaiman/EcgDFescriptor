@@ -15,7 +15,7 @@ export default function ReportScreen() {
     return (
       <View style={[styles.container, styles.center]}>
         <Text style={styles.errorText}>No analysis data found.</Text>
-        <Pressable style={styles.backButton} onPress={() => router.replace('/home')}>
+        <Pressable style={styles.backButton} onPress={() => router.replace('/')}>
           <Text style={styles.buttonText}>Go Home</Text>
         </Pressable>
       </View>
@@ -31,7 +31,7 @@ export default function ReportScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ paddingTop: insets.top, paddingBottom: insets.bottom + 40 }}>
       {/* Header */}
       <View style={styles.header}>
-        <Pressable onPress={() => router.replace('/home')} style={styles.iconButton}>
+        <Pressable onPress={() => router.replace('/')} style={styles.iconButton}>
           <Feather name="x" size={24} color="#fff" />
         </Pressable>
         <Text style={styles.headerTitle}>ECG Report</Text>

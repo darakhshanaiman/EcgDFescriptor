@@ -1,17 +1,18 @@
 {
   "expo": {
-    "name": "my-ai-app",
-    "slug": "my-ai-app",
+    "name": "Lifeline.ai",
+    "slug": "lifeline-ai",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/mascot_clean.jpg",
-    "scheme": "myaiapp",
+    "scheme": "lifelineai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.lifeline.ai",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/mascot_clean.jpg"
@@ -28,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/mascot_clean.jpg",
+          "image": "./assets/images/welcom.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -41,6 +42,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5e2dc13f-6c2d-4317-9ef7-c4302accebec"
+      }
     }
   }
 }

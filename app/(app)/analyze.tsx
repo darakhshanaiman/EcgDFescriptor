@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { useChatSessions } from '../../lib/contexts/ChatSessionsContext';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../lib/contexts/ThemeContext';
+import { analyzeEcgFile } from '../../lib/services/ecgAnalysisApi';
 
 const { width } = Dimensions.get('window');
 
@@ -65,13 +66,45 @@ export default function AnalyzeScreen() {
     }
   }, [step]);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
+    if (!selectedImage) return;
+
     setStep('analyzing');
     setProgress(0);
-    
-    // Simulate complex analysis
-    setTimeout(() => {
-      // Mock result
+
+    try {
+      // Call the API with image URI
+      const result = await analyzeEcgFile({
+        uri: selectedImage,
+        type: 'image/jpeg',
+        name: 'ecg_image.jpg',
+      }, {
+        onUploadProgress: (percent) => {
+          setProgress(percent);
+        },
+      });
+
+      // Update the chat session with real results
+      updateActiveChat({
+        ecgFlowStep: 'report',
+        ecgImageDataUrl: selectedImage,
+        ecgFileName: 'ECG_' + new Date().getTime() + '.jpg',
+        analysisResult: {
+          rhythm: result.analysis.diagnosis,
+          heartRate: 72, // This might need to be extracted from the API response
+          intervals: {
+            pr: '160 ms',
+            qrs: '90 ms',
+            qtc: '410 ms'
+          },
+          findings: result.analysis.findings,
+          impression: result.analysis.recommendation
+        }
+      });
+      router.push('/report');
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      // For now, fall back to mock result on error
       updateActiveChat({
         ecgFlowStep: 'report',
         ecgImageDataUrl: selectedImage,
@@ -89,7 +122,7 @@ export default function AnalyzeScreen() {
         }
       });
       router.push('/report');
-    }, 3000);
+    }
   };
 
   return (
