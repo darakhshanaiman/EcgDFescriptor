@@ -4,7 +4,7 @@
     "slug": "my-ai-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/mascot_clean.png",
+    "icon": "./assets/images/mascot_clean.jpg",
     "scheme": "myaiapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,21 +14,21 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/mascot_clean.png"
+        "foregroundImage": "./assets/images/mascot_clean.jpg"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/mascot_clean.png"
+      "favicon": "./assets/images/mascot_clean.jpg"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/mascot_clean.png",
+          "image": "./assets/images/mascot_clean.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",

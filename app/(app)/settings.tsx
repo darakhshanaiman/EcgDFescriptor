@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '../../lib/contexts/ThemeContext';
@@ -11,15 +11,30 @@ export default function SettingsScreen() {
   const { logOut } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      // Use dismissAll or similar if needed to clear stack, but replace to root is usually enough
-      // if AuthContext state updates correctly.
-      router.replace('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const handleLogout = () => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to log out?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Log Out", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await logOut();
+              // Small delay to allow Auth state to sync
+              setTimeout(() => {
+                router.replace('/');
+              }, 500);
+            } catch (error) {
+              Alert.alert('Error', 'Failed to log out. Please try again.');
+              console.error('Logout error:', error);
+            }
+          }
+        }
+      ]
+    );
   };
 
   const menuItems = [

@@ -84,11 +84,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           displayName: displayName
         });
         await result.user.reload();
-        setUser(auth.currentUser);
+        // Force the local user state to update with the new display name
+        const updatedUser = auth.currentUser;
+        if (updatedUser) setUser({ ...updatedUser });
       }
     } catch (error: any) {
       console.error('Sign up error:', error);
-      throw new Error(getAuthErrorMessage(error.code));
+      throw new Error(getAuthErrorMessage(error.code || error.message));
     }
   };
 
@@ -97,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (error: any) {
       console.error('Login error:', error);
-      throw new Error(getAuthErrorMessage(error.code));
+      throw new Error(getAuthErrorMessage(error.code || error.message));
     }
   };
 
@@ -106,7 +108,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await signOut(auth);
     } catch (error: any) {
       console.error('Logout error:', error);
-      throw new Error('Failed to log out. Please try again.');
+    } finally {
+      setUser(null); // Ensure user is cleared locally no matter what
     }
   };
 
@@ -136,12 +139,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateUserProfile = async (profile: { displayName?: string; photoURL?: string }) => {
     try {
-      if (!auth.currentUser) {
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
         throw new Error('No user is currently signed in');
       }
-      await updateProfile(auth.currentUser, profile);
-      await auth.currentUser.reload();
-      setUser(auth.currentUser);
+      await updateProfile(currentUser, profile);
+      await currentUser.reload();
+      setUser({ ...currentUser }); // Create a new object to trigger state change
     } catch (error: any) {
       console.error('Profile update error:', error);
       throw new Error('Failed to update profile. Please try again.');
@@ -180,12 +184,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-function getAuthErrorMessage(errorCode: string): string {
-  switch (errorCode) {
+function getAuthErrorMessage(errorKey: string): string {
+  // If the errorKey contains the technical Firebase string, extract just the code
+  let code = errorKey;
+  if (errorKey.includes('(') && errorKey.includes(')')) {
+    const match = errorKey.match(/\(([^)]+)\)/);
+    if (match) code = match[1];
+  } else if (errorKey.includes('Firebase:')) {
+    // Fallback search for common codes if the wrap is missing
+    if (errorKey.includes('auth/invalid-credential')) code = 'auth/invalid-credential';
+    if (errorKey.includes('auth/wrong-password')) code = 'auth/wrong-password';
+    if (errorKey.includes('auth/user-not-found')) code = 'auth/user-not-found';
+  }
+
+  switch (code) {
     case 'auth/email-already-in-use':
       return 'This email is already registered. Please log in instead.';
     case 'auth/invalid-email':
-      return 'Invalid email address.';
+      return 'Invalid email address format.';
     case 'auth/operation-not-allowed':
       return 'Email/password accounts are not enabled. Please contact support.';
     case 'auth/weak-password':
@@ -195,18 +211,19 @@ function getAuthErrorMessage(errorCode: string): string {
     case 'auth/user-not-found':
       return 'We couldn\'t find an account with this email. Would you like to sign up instead?';
     case 'auth/wrong-password':
-      return 'The password you entered is incorrect. please try again.';
     case 'auth/invalid-credential':
-      return 'Invalid email or password. Please try again.';
+      return 'Invalid email or password. Please check your credentials and try again.';
     case 'auth/too-many-requests':
       return 'Too many failed attempts. Please try again later.';
     case 'auth/network-request-failed':
-      return 'Network error. Please check your connection.';
+      return 'Network error. Please check your internet connection.';
     case 'auth/popup-closed-by-user':
       return 'Sign-in popup was closed. Please try again.';
     case 'auth/cancelled-popup-request':
       return 'Sign-in was cancelled. Please try again.';
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists with this email but different login method.';
     default:
-      return 'An error occurred. Please try again.';
+      return 'An unexpected authentication error occurred. Please try again.';
   }
 }

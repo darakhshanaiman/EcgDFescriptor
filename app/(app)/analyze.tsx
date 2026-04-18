@@ -22,7 +22,7 @@ export default function AnalyzeScreen() {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 1,
     });
 
@@ -34,7 +34,7 @@ export default function AnalyzeScreen() {
 
   const takePhoto = async () => {
     let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
+      allowsEditing: false,
       quality: 1,
     });
 
@@ -111,7 +111,7 @@ export default function AnalyzeScreen() {
           <View style={styles.welcomeContainer}>
             <View style={[styles.mascotContainer, { backgroundColor: colors.background, borderColor: colors.border }]}>
               <Image 
-                source={require('../../assets/images/mascot_clean.png')} 
+                source={require('../../assets/images/mascot_clean.jpg')} 
                 style={styles.mascotImage}
                 resizeMode="cover"
               />
@@ -134,24 +134,29 @@ export default function AnalyzeScreen() {
         )}
 
         {step === 'confirm_image' && selectedImage && (
-          <View style={styles.previewContainer}>
-            <Text style={[styles.previewTitle, { color: colors.text }]}>Confirm Image</Text>
-            <View style={[styles.imagePreviewWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Image source={{ uri: selectedImage }} style={styles.imagePreview} />
-              <Pressable style={styles.removeButton} onPress={() => setStep('welcome')}>
-                <Feather name="x" size={20} color="#fff" />
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.background, zIndex: 10 }]}>
+            <View style={[styles.header, { paddingTop: insets.top }]}>
+              <Pressable onPress={() => setStep('welcome')} style={styles.backButton}>
+                <Feather name="x" size={24} color={colors.text} />
+              </Pressable>
+              <View style={styles.titleContainer}>
+                <Text style={[styles.headerTitle, { color: colors.text }]}>Check ECG</Text>
+              </View>
+              <Pressable onPress={startUploading} style={styles.backButton}>
+                <Feather name="check" size={28} color={colors.primary} />
               </Pressable>
             </View>
-            <Text style={[styles.confirmSubtitle, { color: colors.textSecondary }]}>
-              Is this image clear and readable?
-            </Text>
-            <View style={styles.confirmActions}>
-              <Pressable style={[styles.confirmCancel, { borderColor: colors.border }]} onPress={() => setStep('welcome')}>
-                <Text style={{ color: colors.textSecondary, fontWeight: '600' }}>Retake</Text>
-              </Pressable>
-              <Pressable style={[styles.confirmOk, { backgroundColor: colors.primary }]} onPress={startUploading}>
-                <Text style={{ color: '#fff', fontWeight: '700' }}>Confirm / Okay</Text>
-              </Pressable>
+
+            <View style={styles.confirmContent}>
+              <View style={[styles.fullImageWrapper, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Image source={{ uri: selectedImage }} style={styles.fullImage} resizeMode="contain" />
+              </View>
+              
+              <View style={styles.confirmInfo}>
+                <Text style={[styles.confirmText, { color: colors.textSecondary }]}>
+                  Ensure the ECG rhythm is clearly visible and readable before continuing.
+                </Text>
+              </View>
             </View>
           </View>
         )}
@@ -186,7 +191,7 @@ export default function AnalyzeScreen() {
           <View style={styles.centerFlow}>
              <View style={[styles.mascotContainerSmall, { backgroundColor: colors.background, borderColor: colors.border }]}>
               <Image 
-                source={require('../../assets/images/mascot_clean.png')} 
+                source={require('../../assets/images/mascot_clean.jpg')} 
                 style={styles.mascotImageSmall}
                 resizeMode="cover"
               />
@@ -368,29 +373,28 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  confirmSubtitle: {
-    fontSize: 14,
-    textAlign: 'center',
-    marginBottom: 24,
-  },
-  confirmActions: {
-    flexDirection: 'row',
-    gap: 16,
-    width: '100%',
-  },
-  confirmCancel: {
+  confirmContent: {
     flex: 1,
-    height: 54,
-    borderRadius: 12,
+    padding: 24,
+  },
+  fullImageWrapper: {
+    flex: 1,
+    borderRadius: 24,
     borderWidth: 1,
-    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  fullImage: {
+    width: '100%',
+    height: '100%',
+  },
+  confirmInfo: {
+    paddingVertical: 32,
     alignItems: 'center',
   },
-  confirmOk: {
-    flex: 2,
-    height: 54,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+  confirmText: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 20,
   },
 });

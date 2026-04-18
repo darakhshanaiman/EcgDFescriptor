@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Image, Modal, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, TextInput, Image, Modal, FlatList, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -53,7 +53,7 @@ export default function ProfileScreen() {
     setShowActionMenu(false);
     const options: ImagePicker.ImagePickerOptions = {
       mediaTypes: ['images'],
-      allowsEditing: true,
+      allowsEditing: false, // Disable native crop to use custom confirm UI
       aspect: [1, 1],
       quality: 1,
     };
@@ -263,19 +263,26 @@ export default function ProfileScreen() {
       </Modal>
 
       {/* Image Confirmation Modal */}
-      <Modal visible={showConfirmModal} transparent animationType="fade">
-        <View style={styles.confirmOverlay}>
-          <View style={[styles.confirmDialog, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.confirmTitle, { color: colors.text }]}>Preview Photo</Text>
-            <Image source={{ uri: tempImage || undefined }} style={styles.confirmPreview} />
-            <View style={styles.confirmButtons}>
-              <Pressable style={[styles.confirmBtn, { backgroundColor: colors.background }]} onPress={() => setShowConfirmModal(false)}>
-                <Text style={{ color: colors.textSecondary }}>Cancel</Text>
-              </Pressable>
-              <Pressable style={[styles.confirmBtn, { backgroundColor: colors.primary }]} onPress={confirmImage}>
-                <Text style={{ color: '#fff', fontWeight: '700' }}>Confirm Photo</Text>
-              </Pressable>
-            </View>
+      <Modal visible={showConfirmModal} transparent={false} animationType="slide">
+        <View style={[styles.confirmOverlay, { backgroundColor: colors.background }]}>
+          <View style={[styles.confirmHeader, { paddingTop: insets.top }]}>
+            <Pressable onPress={() => setShowConfirmModal(false)} style={styles.headerBtn}>
+              <Feather name="x" size={24} color={colors.text} />
+            </Pressable>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Check Photo</Text>
+            <Pressable onPress={confirmImage} style={styles.headerBtn}>
+              <Feather name="check" size={28} color={colors.primary} />
+            </Pressable>
+          </View>
+          
+          <View style={styles.confirmMain}>
+            <Image source={{ uri: tempImage || undefined }} style={styles.fullPreview} resizeMode="contain" />
+          </View>
+
+          <View style={[styles.confirmFooter, { paddingBottom: insets.bottom + 20 }]}>
+            <Text style={[styles.confirmHint, { color: colors.textSecondary }]}>
+              Is this photo okay? Tap the tick to confirm.
+            </Text>
           </View>
         </View>
       </Modal>
@@ -508,40 +515,41 @@ const styles = StyleSheet.create({
   countryLabel: {
     fontSize: 16,
   },
+  // Confirmation Styles
   confirmOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+  },
+  confirmHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    height: 60 + 40,
+  },
+  headerBtn: {
+    width: 44,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmMain: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  confirmDialog: {
+  fullPreview: {
     width: '100%',
-    borderRadius: 24,
-    padding: 24,
+    height: '100%',
+    borderRadius: 20,
+  },
+  confirmFooter: {
+    paddingHorizontal: 40,
     alignItems: 'center',
   },
-  confirmTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 20,
-  },
-  confirmPreview: {
-    width: '100%',
-    aspectRatio: 1,
-    borderRadius: 16,
-    marginBottom: 24,
-  },
-  confirmButtons: {
-    flexDirection: 'row',
-    gap: 12,
-    width: '100%',
-  },
-  confirmBtn: {
-    flex: 1,
-    height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 12,
+  confirmHint: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
   },
 });
