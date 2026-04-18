@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 import {
   User,
   createUserWithEmailAndPassword,
@@ -8,9 +11,14 @@ import {
   signInWithPopup,
   updateProfile,
   updatePassword,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  GoogleAuthProvider,
+  signInWithCredential
 } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+
+// Required for AuthSession to work on web and native
+WebBrowser.maybeCompleteAuthSession();
 
 interface AuthContextType {
   user: User | null;
@@ -38,6 +46,25 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // --- Google Auth Configuration ---
+  // IMPORTANT: Replace these with your actual IDs from the Firebase Console
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: '396635906800-ebmdujrcnchvaa1asktp3fggna97p0lv.apps.googleusercontent.com',
+    androidClientId: 'YOUR_ANDROID_CLIENT_ID_HERE.apps.googleusercontent.com',
+    iosClientId: 'YOUR_IOS_CLIENT_ID_HERE.apps.googleusercontent.com',
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { id_token } = response.params;
+      const credential = GoogleAuthProvider.credential(id_token);
+      signInWithCredential(auth, credential).catch((error) => {
+        console.error('Firebase native sign-in error:', error);
+      });
+    }
+  }, [response]);
+  // ----------------------------------
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -85,7 +112,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      if (Platform.OS === 'web') {
+        // Web flow
+        await signInWithPopup(auth, googleProvider);
+      } else {
+        // Native flow (Expo Go / Mobile)
+        await promptAsync();
+      }
     } catch (error: any) {
       console.error('Google sign-in error:', error);
       throw new Error(getAuthErrorMessage(error.code));
@@ -160,9 +193,9 @@ function getAuthErrorMessage(errorCode: string): string {
     case 'auth/user-disabled':
       return 'This account has been disabled. Please contact support.';
     case 'auth/user-not-found':
-      return 'No account found with this email.';
+      return 'We couldn\'t find an account with this email. Would you like to sign up instead?';
     case 'auth/wrong-password':
-      return 'Incorrect password. Please try again.';
+      return 'The password you entered is incorrect. please try again.';
     case 'auth/invalid-credential':
       return 'Invalid email or password. Please try again.';
     case 'auth/too-many-requests':

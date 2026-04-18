@@ -26,6 +26,8 @@ type ChatSessionsContextValue = {
   updateActiveChat: (patch: Partial<LifelineChatSession>) => void;
   appendActiveMessage: (message: Omit<LifelineChatMessage, 'id'>) => void;
   resetActiveChat: () => void;
+  deleteSession: (sessionId: string) => void;
+  renameSession: (sessionId: string, newName: string) => void;
 };
 
 const STORAGE_SESSIONS_KEY = 'lifeline.chat.sessions.v1';
@@ -193,6 +195,29 @@ export function ChatSessionsProvider({ children }: PropsWithChildren) {
     });
   }, []);
 
+  const deleteSession = useCallback((sessionId: string) => {
+    setState((prev) => {
+      const nextSessions = prev.sessions.filter((s) => s.id !== sessionId);
+      // If we deleted the active one, or if no sessions left, create a fresh one
+      if (nextSessions.length === 0) {
+        const fresh = newSession();
+        return { activeSessionId: fresh.id, sessions: [fresh], isLoaded: true };
+      }
+      const nextActiveId = prev.activeSessionId === sessionId ? nextSessions[0].id : prev.activeSessionId;
+      return { ...prev, sessions: nextSessions, activeSessionId: nextActiveId };
+    });
+  }, []);
+
+  const renameSession = useCallback((sessionId: string, newName: string) => {
+    setState((prev) => {
+      const nextSessions = prev.sessions.map((s) => {
+        if (s.id !== sessionId) return s;
+        return { ...s, ecgFileName: newName, updatedAt: Date.now() };
+      });
+      return { ...prev, sessions: nextSessions };
+    });
+  }, []);
+
   const value: ChatSessionsContextValue = useMemo(
     () => ({
       activeSession,
@@ -204,6 +229,8 @@ export function ChatSessionsProvider({ children }: PropsWithChildren) {
       updateActiveChat,
       appendActiveMessage,
       resetActiveChat,
+      deleteSession,
+      renameSession,
     }),
     [
       activeSession,
@@ -215,6 +242,8 @@ export function ChatSessionsProvider({ children }: PropsWithChildren) {
       updateActiveChat,
       appendActiveMessage,
       resetActiveChat,
+      deleteSession,
+      renameSession,
     ],
   );
 

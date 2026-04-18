@@ -10,11 +10,21 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../lib/contexts/AuthContext";
 
 export default function LandingScreen() {
   const { width } = useWindowDimensions();
+  const { user, loading } = useAuth();
   const isMobile = width < 768;
+
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/(app)");
+    }
+  }, [user, loading]);
+
+  if (loading) return null;
 
   if (isMobile) {
     return (

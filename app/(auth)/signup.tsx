@@ -21,33 +21,37 @@ export default function SignupScreen() {
   const { width, height } = useWindowDimensions();
   const { signUp, signInWithGoogle } = useAuth();
 
+  const [error, setError] = useState<string | null>(null);
+
   const isSmallScreen = width < 480;
 
   const handleSignup = async () => {
+    setError(null);
     if (!email.trim() || !password || !confirmPassword) {
-      Alert.alert("Missing fields", "Please fill in all fields.");
+      setError("Please fill in all fields.");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Password mismatch", "Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
     try {
       await signUp(email.trim(), password);
-      router.replace("/home");
-    } catch (error: any) {
-      Alert.alert("Signup failed", error.message);
+      router.replace("/(app)");
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setError(null);
     try {
       await signInWithGoogle();
-      router.replace("/home");
-    } catch (error: any) {
-      Alert.alert("Google sign-in failed", error.message);
+      router.replace("/(app)");
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -73,6 +77,15 @@ export default function SignupScreen() {
             style={styles.illustration}
             resizeMode="contain"
           />
+
+          {error && (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle" size={20} color="#EB5757" />
+              <View style={styles.errorContent}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            </View>
+          )}
 
           <View style={styles.inputBlock}>
             <Text style={styles.label}>Email</Text>
@@ -186,6 +199,25 @@ const styles = StyleSheet.create({
     height: 140,
     alignSelf: "center",
     marginBottom: 22,
+  },
+  errorBanner: {
+    backgroundColor: "rgba(235, 87, 87, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(235, 87, 87, 0.3)",
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+    gap: 10,
+  },
+  errorContent: {
+    flex: 1,
+  },
+  errorText: {
+    color: "#EB5757",
+    fontSize: 13,
+    lineHeight: 18,
   },
   inputBlock: {
     marginBottom: 10,

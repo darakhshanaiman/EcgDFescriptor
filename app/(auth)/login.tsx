@@ -20,23 +20,27 @@ export default function LoginScreen() {
   const { width, height } = useWindowDimensions();
   const { logIn, signInWithGoogle } = useAuth();
 
+  const [error, setError] = useState<string | null>(null);
+
   const isSmallScreen = width < 480;
 
   const handleLogin = async () => {
+    setError(null);
     try {
       await logIn(email.trim(), password);
-      router.replace("/home");
-    } catch (error: any) {
-      Alert.alert("Login failed", error.message);
+      router.replace("/(app)");
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setError(null);
     try {
       await signInWithGoogle();
-      router.replace("/home");
-    } catch (error: any) {
-      Alert.alert("Google sign-in failed", error.message);
+      router.replace("/(app)");
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -65,6 +69,20 @@ export default function LoginScreen() {
             style={styles.illustration}
             resizeMode="contain"
           />
+
+          {error && (
+            <View style={styles.errorBanner}>
+              <Ionicons name="alert-circle" size={20} color="#EB5757" />
+              <View style={styles.errorContent}>
+                <Text style={styles.errorText}>{error}</Text>
+                {error.includes("sign up") && (
+                  <Pressable onPress={() => router.push("/signup")}>
+                    <Text style={styles.signupLinkText}>Go to Sign Up</Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          )}
 
           <View style={styles.inputBlock}>
             <Text style={styles.label}>Email</Text>
@@ -170,6 +188,32 @@ const styles = StyleSheet.create({
     height: 140,
     alignSelf: "center",
     marginBottom: 20,
+  },
+  errorBanner: {
+    backgroundColor: "rgba(235, 87, 87, 0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(235, 87, 87, 0.3)",
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 20,
+    gap: 10,
+  },
+  errorContent: {
+    flex: 1,
+  },
+  errorText: {
+    color: "#EB5757",
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  signupLinkText: {
+    color: "#2F80ED",
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 6,
+    textDecorationLine: "underline",
   },
   inputBlock: {
     marginBottom: 10,
