@@ -4,7 +4,7 @@
     "slug": "lifeline-ai",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/mascot_clean.jpg",
+    "icon": "./assets/images/welcom.png",
     "scheme": "lifelineai",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,14 +15,14 @@
       "package": "com.lifeline.ai",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/mascot_clean.jpg"
+        "foregroundImage": "./assets/images/welcom.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/mascot_clean.jpg"
+      "favicon": "./assets/images/welcom.png"
     },
     "plugins": [
       "expo-router",
