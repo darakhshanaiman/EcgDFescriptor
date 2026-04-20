@@ -10,7 +10,7 @@ describe('Utility Functions', () => {
       expect(formatHeartRate(72.5)).toBe('73 bpm');
     });
 
-    it('handles undefined or null', () => {
+    it('test_format_heart_rate_handles_null_or_undefined', () => {
       expect(formatHeartRate(null)).toBe('N/A');
       expect(formatHeartRate(undefined)).toBe('N/A');
     });
@@ -25,7 +25,7 @@ describe('Utility Functions', () => {
       expect(validateEcgData(dataWithoutHr)).toBe(false);
     });
 
-    it('validates correct ECG data', () => {
+    it('test_validate_ecg_accepts_valid_data', () => {
       const validData = {
         heartRate: 75,
         dataPoints: [1, 2, 3],
@@ -34,7 +34,7 @@ describe('Utility Functions', () => {
       expect(validateEcgData(validData)).toBe(true);
     });
 
-    it('handles null or undefined data', () => {
+    it('test_validate_ecg_rejects_null_or_undefined_data', () => {
       expect(validateEcgData(null)).toBe(false);
       expect(validateEcgData(undefined)).toBe(false);
     });
@@ -50,7 +50,7 @@ describe('Utility Functions', () => {
       expect(formatted).toMatch(/2026/); // check year presence
     });
 
-    it('handles invalid dates gracefully', () => {
+    it('test_format_timestamp_handles_invalid_date', () => {
       expect(formatTimestamp('invalid-date')).toBe('Invalid Date');
     });
   });
@@ -60,11 +60,11 @@ describe('Utility Functions', () => {
       expect(sanitizeInput('<script>alert("xss")</script>')).toBe('scriptalert("xss")/script');
     });
 
-    it('trims whitespace', () => {
+    it('test_sanitize_input_trims_whitespace', () => {
       expect(sanitizeInput('   hello world   ')).toBe('hello world');
     });
 
-    it('handles non-string input safely', () => {
+    it('test_sanitize_input_handles_non_string_input', () => {
       // @ts-ignore
       expect(sanitizeInput(null)).toBe('');
     });
