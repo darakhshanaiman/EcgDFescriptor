@@ -13,7 +13,7 @@ jest.mock('expo-router', () => ({
   router: { push: jest.fn(), back: jest.fn(), replace: jest.fn() }
 }));
 
-jest.mock('../contexts/AuthContext', () => ({
+jest.mock('../lib/contexts/AuthContext', () => ({
   useAuth: jest.fn()
 }));
 
@@ -22,7 +22,7 @@ jest.mock('firebase/auth', () => ({
   getAuth: jest.fn()
 }));
 
-jest.mock('../../lib/firebase', () => ({
+jest.mock('../lib/firebase', () => ({
   auth: {}
 }));
 

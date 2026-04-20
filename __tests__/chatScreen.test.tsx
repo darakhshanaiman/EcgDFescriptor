@@ -14,11 +14,11 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0 })
 }));
 
-jest.mock('../contexts/ChatSessionsContext', () => ({
+jest.mock('../lib/contexts/ChatSessionsContext', () => ({
   useChatSessions: jest.fn()
 }));
 
-jest.mock('../services/ecgAnalysisApi', () => ({
+jest.mock('../lib/services/ecgAnalysisApi', () => ({
   chatEcgWithContext: jest.fn()
 }));
 

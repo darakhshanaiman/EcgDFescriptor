@@ -8,7 +8,7 @@ jest.mock('expo-router', () => ({
   router: { push: jest.fn(), replace: jest.fn() }
 }));
 
-jest.mock('../contexts/AuthContext', () => ({
+jest.mock('../lib/contexts/AuthContext', () => ({
   useAuth: jest.fn()
 }));
 
